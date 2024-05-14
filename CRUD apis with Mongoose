@@ -1,0 +1,53 @@
+***************************config.js************************************
+
+const mongoose = require('mongoose');
+mongoose.connect("mongodb://localhost:27017/e-comm");
+
+
+******************************Schema/Model of each collection "Product.js*******************************************
+const mongoose = require('mongoose');
+const productSchema= mongoose.Schema({
+    name:String,
+    price:Number,
+    brand:String,
+    category:String
+});
+
+module.exports= mongoose.model("products",productSchema);
+
+
+*************************************Actual CRUD APIS with Mongoose*********************************************
+const express = require('express');
+require("./config");
+const Product = require('./product');
+const app = express();
+
+app.use(express.json());
+app.post("/create", async (req, resp) => {
+    let data = new Product(req.body);                              //Insert
+    const result = await data.save();
+    resp.send(result);
+});
+
+app.get("/list", async (req, resp) => {
+    let data = await Product.find();                            //Select
+    resp.send(data);
+})
+
+app.delete("/delete/:_id", async (req, resp) => {
+    console.log(req.params)
+    let data = await Product.deleteOne(req.params);              // Delete
+    resp.send(data);
+})
+
+
+app.put("/update/:_id",async (req, resp) => {
+    console.log(req.params)
+    let data = await Product.updateOne(                        //Update
+        req.params,
+        {$set: req.body}
+    );
+    resp.send(data);
+})
+
+app.listen(5000)
